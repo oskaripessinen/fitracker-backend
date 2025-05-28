@@ -5,7 +5,6 @@ dotenv.config();
 
 const connectionString = process.env.DB_URL || '';
 
-console.log('Connection string:', connectionString);
 
 const sql = postgres(connectionString, {
   ssl: 'require',

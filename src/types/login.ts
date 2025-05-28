@@ -1,7 +1,7 @@
 import { User } from './user';
 
 export interface LoginRequest {
-  googleToken: string;
+  token: string;
 }
 
 export interface LoginResponse {
