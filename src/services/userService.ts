@@ -1,12 +1,12 @@
 import sql from '../config/database';
+import { UserModel } from '../models/user';
 import { User, CreateUserRequest, UpdateUserRequest } from '../types';
 
 export class UserService {
   static async getAllUsers(): Promise<User[]> {
     try {
-      const users = await sql`SELECT * FROM users ORDER BY created_at DESC`;
-      console.log('Fetched users:', users);
-      return users.map(row => ({
+      const rows = await UserModel.findAll();
+      return rows.map(row => ({
         google_id: row.google_id,
         email: row.email,
         full_name: row.full_name,
@@ -21,15 +21,14 @@ export class UserService {
 
   static async getUserById(id: string): Promise<User | null> {
     try {
-      const users = await sql`SELECT * FROM users WHERE id = ${id}`;
-      if (users.length === 0) return null;
+      const row = await UserModel.findById(id);
+      if (!row) return null;
       
-      const row = users[0];
       return {
-        google_id: row.google_id,
+        google_id: row.id,
         email: row.email,
         full_name: row.full_name,
-        avatar: row.avatar_url,
+        avatar: row.avatar,
         createdAt: row.created_at,
       } as User;
     } catch (error) {
@@ -40,18 +39,23 @@ export class UserService {
 
   static async createUser(userData: CreateUserRequest): Promise<User> {
     try {
-      const users = await sql`
-        INSERT INTO users (email, username, first_name, last_name, avatar, is_active, created_at, updated_at)
-        VALUES (${userData.email}, ${userData.username}, ${userData.firstName}, ${userData.lastName}, ${userData.avatar || null}, ${true}, NOW(), NOW())
-        RETURNING *
-      `;
+      // Business validation
+      if (!userData.email || !userData.full_name) {
+        throw new Error('Email and full name are required');
+      }
+
+      const row = await UserModel.create({
+        id: userData.id,
+        email: userData.email,
+        full_name: userData.full_name,
+        avatar: userData.avatar
+      });
       
-      const row = users[0];
       return {
-        google_id: row.google_id,
+        google_id: row.id,
         email: row.email,
         full_name: row.full_name,
-        avatar: row.avatar_url,
+        avatar: row.avatar,
         createdAt: row.created_at,
       } as User;
     } catch (error) {
@@ -59,7 +63,7 @@ export class UserService {
       throw new Error('Failed to create user');
     }
   }
-
+  
   static async updateUser(id: string, userData: UpdateUserRequest): Promise<User> {
     try {
       // Rakenna UPDATE kysely dynaamisesti vain ei-undefined arvoille

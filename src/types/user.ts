@@ -7,11 +7,9 @@ export interface User {
 }
 
 export interface CreateUserRequest {
+  id: string;
   email: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  password: string;
+  full_name: string;
   avatar?: string;
 }
 
