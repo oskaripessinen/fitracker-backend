@@ -181,7 +181,6 @@ export class GroupService {
         throw new Error('Only admins can change member roles');
       }
 
-      // Don't allow changing creator's role
       if (userId === group.created_by) {
         throw new Error('Cannot change group creator role');
       }

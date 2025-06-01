@@ -17,29 +17,25 @@ import { authenticateToken } from '../middleware/auth';
 
 const groupRoutes = express.Router();
 
-// Public routes (no authentication required)
-groupRoutes.get('/', getGroups);                           // GET /api/groups
-groupRoutes.get('/:id', getGroupById);                     // GET /api/groups/:id
 
-// Protected routes (authentication required)
+groupRoutes.get('/', getGroups);                          
+groupRoutes.get('/:id', getGroupById);                    
 
-groupRoutes.post('/',authenticateToken, createGroup);
+groupRoutes.post('/', authenticateToken, createGroup);
 groupRoutes.put('/:id', updateGroup); 
 
-// Group member routes
-groupRoutes.get('/:id/members', getGroupMembers);          // GET /api/groups/:id/members
-groupRoutes.post('/:id/members', addMember);               // POST /api/groups/:id/members
-groupRoutes.delete('/:id/members/:userId', removeMember);  // DELETE /api/groups/:id/members/:userId
-groupRoutes.put('/:id/members/:userId', updateMemberRole); // PUT /api/groups/:id/members/:userId
+groupRoutes.get('/:id/members', getGroupMembers);         
+groupRoutes.post('/:id/members', addMember);              
+groupRoutes.delete('/:id/members/:userId', removeMember); 
+groupRoutes.put('/:id/members/:userId', updateMemberRole);
 
-// Join/Leave routes
-groupRoutes.post('/:id/join', joinGroup);                  // POST /api/groups/:id/join
-groupRoutes.post('/:id/leave', leaveGroup);                // POST /api/groups/:id/leave
+groupRoutes.post('/:id/join', joinGroup);                 
+groupRoutes.post('/:id/leave', leaveGroup);                
 
-// Get group with all member details
-groupRoutes.get('/:id/details', getGroupWithMembers);      // GET /api/groups/:id/details
 
-// User's groups
-groupRoutes.get('/user/my-groups', getUserGroups);         // GET /api/groups/user/my-groups
+groupRoutes.get('/:id/details', getGroupWithMembers);
+
+
+groupRoutes.get('/user/my-groups',authenticateToken, getUserGroups);         
 
 export default groupRoutes;

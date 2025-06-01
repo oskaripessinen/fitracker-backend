@@ -11,48 +11,76 @@ interface AuthenticatedRequest extends Request {
 export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = authHeader && authHeader.split(' ')[1]; 
 
-    console.log('Auth header:', authHeader); // Debug
-    console.log('Extracted token:', token); // Debug
+    console.log('Auth header:', authHeader);
+    console.log('Extracted token:', token?.substring(0, 20) + '...');
 
     if (!token) {
-      return res.status(401).json({ 
+      res.status(401).json({ 
         success: false, 
         error: 'Access token required' 
       });
+      return; 
     }
 
-    // Tarkista Supabase token
-    const response = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+    // Tarkista environment muuttujat
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+      console.error('Missing Supabase environment variables');
+      res.status(500).json({ 
+        success: false, 
+        error: 'Server configuration error' 
+      });
+      return;
+    }
+
+    const supabaseUrl = `${process.env.SUPABASE_URL}/auth/v1/user`;
+    console.log('Validating token with:', supabaseUrl);
+
+    const response = await fetch(supabaseUrl, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'apikey': process.env.SUPABASE_ANON_KEY!
+        'apikey': process.env.SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
       }
     });
 
+    console.log('Supabase response status:', response.status);
+
     if (!response.ok) {
-      console.log('Supabase auth failed:', response.status); // Debug
-      return res.status(401).json({ 
+      const errorText = await response.text();
+      console.log('Supabase auth failed:', response.status, errorText);
+      res.status(401).json({ 
         success: false, 
         error: 'Invalid or expired token' 
       });
+      return;
     }
 
     const userData = await response.json();
-    console.log('Authenticated user:', userData); // Debug
+    console.log('Authenticated user ID:', userData.id);
+    
+    if (!userData.id || !userData.email) {
+      console.error('Invalid user data from Supabase:', userData);
+      res.status(401).json({ 
+        success: false, 
+        error: 'Invalid user data' 
+      });
+      return;
+    }
     
     req.user = {
-      id: userData.id, // Google ID
+      id: userData.id,
       email: userData.email
     };
 
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    return res.status(401).json({ 
+    res.status(401).json({ 
       success: false, 
       error: 'Authentication failed' 
     });
+    return;
   }
 };
