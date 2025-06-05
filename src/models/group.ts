@@ -37,11 +37,11 @@ export class GroupModel {
     return groups.length > 0 ? groups[0] : null;
   }
 
-  static async addMember(groupId: number, userId: string, role: string = 'member') {
+  static async addMember(groupId: number, userId: string) {
     const members = await sql`
-      INSERT INTO group_members (group_id, user_id, role, joined_at)
-      VALUES (${groupId}, ${userId}, ${role}, NOW())
-      ON CONFLICT (group_id, user_id) DO UPDATE SET role = ${role}
+      INSERT INTO group_members (group_id, user_id, joined_at)
+      VALUES (${groupId}, ${userId}, NOW())
+      ON CONFLICT (group_id, user_id) DO NOTHING
       RETURNING *
     `;
     return members[0];
@@ -55,22 +55,11 @@ export class GroupModel {
     return result.count;
   }
 
-  static async updateMemberRole(groupId: number, userId: string, role: string) {
-    const members = await sql`
-      UPDATE group_members 
-      SET role = ${role}
-      WHERE group_id = ${groupId} AND user_id = ${userId}
-      RETURNING *
-    `;
-    return members.length > 0 ? members[0] : null;
-  }
-
-  // Haku operaatiot
   static async getGroupMembers(groupId: number) {
     return await sql`
       SELECT 
-        u.google_id, u.email, u.full_name, u.avatar,
-        gm.role, gm.joined_at
+        u.google_id AS user_id, u.email, u.full_name, u.avatar,
+        gm.joined_at
       FROM group_members gm
       JOIN users u ON gm.user_id = u.google_id
       WHERE gm.group_id = ${groupId}
@@ -82,7 +71,7 @@ export class GroupModel {
     return await sql`
       SELECT 
         g.id, g.name, g.description, g.created_at,
-        gm.role, gm.joined_at,
+        gm.joined_at,
         creator.full_name as creator_name
       FROM group_members gm
       JOIN groups g ON gm.group_id = g.id
@@ -97,15 +86,22 @@ export class GroupModel {
       SELECT 
         g.id, g.name, g.description, g.created_at,
         creator.google_id as creator_id, creator.full_name as creator_name,
-        json_agg(
-          json_build_object(
-            'user_id', gm.user_id,
-            'full_name', u.full_name,
-            'email', u.email,
-            'avatar', u.avatar,
-            'role', gm.role,
-            'joined_at', gm.joined_at
-          ) ORDER BY gm.joined_at
+        COALESCE(
+          json_agg(
+            CASE 
+              WHEN gm.user_id IS NOT NULL THEN
+                json_build_object(
+                  'user_id', gm.user_id,
+                  'full_name', u.full_name,
+                  'email', u.email,
+                  'avatar', u.avatar,
+                  'joined_at', gm.joined_at
+                )
+              ELSE NULL
+            END
+            ORDER BY gm.joined_at
+          ) FILTER (WHERE gm.user_id IS NOT NULL),
+          '[]'::json
         ) as members
       FROM groups g
       LEFT JOIN users creator ON g.created_by = creator.google_id
@@ -124,19 +120,18 @@ export class GroupModel {
     return members.length > 0;
   }
 
-  static async getMemberRole(groupId: number, userId: string) {
-    const members = await sql`
-      SELECT role FROM group_members 
-      WHERE group_id = ${groupId} AND user_id = ${userId}
-    `;
-    return members.length > 0 ? members[0].role : null;
-  }
-
   static async getGroupsByCreator(creatorId: string) {
     return await sql`
       SELECT * FROM groups 
       WHERE created_by = ${creatorId}
       ORDER BY created_at DESC
     `;
+  }
+
+  static async deleteGroup(groupId: number) {
+    const result = await sql`
+      DELETE FROM groups WHERE id = ${groupId}
+    `;
+    return result.count;
   }
 }

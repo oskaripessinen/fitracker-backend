@@ -30,7 +30,7 @@ groupRoutes.delete('/:id/members/:userId', removeMember);
 groupRoutes.put('/:id/members/:userId', updateMemberRole);
 
 groupRoutes.post('/:id/join', joinGroup);                 
-groupRoutes.post('/:id/leave', leaveGroup);                
+groupRoutes.post('/:id/leave',authenticateToken, leaveGroup);                
 
 
 groupRoutes.get('/:id/details', getGroupWithMembers);

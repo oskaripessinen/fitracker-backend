@@ -12,7 +12,6 @@ export interface Group {
 export interface GroupMember {
   group_id: number;
   user_id: string;
-  role: 'admin' | 'moderator' | 'member';
   joined_at: Date;
 }
 
