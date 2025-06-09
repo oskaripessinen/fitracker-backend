@@ -7,7 +7,6 @@ import {
   getGroupMembers,
   addMember,
   removeMember,
-  updateMemberRole,
   joinGroup,
   leaveGroup,
   getUserGroups,
@@ -27,7 +26,6 @@ groupRoutes.put('/:id', updateGroup);
 groupRoutes.get('/:id/members', getGroupMembers);         
 groupRoutes.post('/:id/members', addMember);              
 groupRoutes.delete('/:id/members/:userId', removeMember); 
-groupRoutes.put('/:id/members/:userId', updateMemberRole);
 
 groupRoutes.post('/:id/join', joinGroup);                 
 groupRoutes.post('/:id/leave',authenticateToken, leaveGroup);                

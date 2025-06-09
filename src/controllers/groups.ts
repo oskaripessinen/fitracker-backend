@@ -210,39 +210,6 @@ export const removeMember = async (req: AuthenticatedRequest, res: Response, nex
   }
 };
 
-export const updateMemberRole = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { id, userId: targetUserId } = req.params;
-    const { role } = req.body;
-    const groupId = parseInt(id);
-    const requesterId = req.user?.id;
-    
-    if (isNaN(groupId)) {
-      res.status(400).json({
-        success: false,
-        error: 'Invalid group ID'
-      });
-      return;
-    }
-
-    if (!requesterId) {
-      res.status(401).json({
-        success: false,
-        error: 'Authentication required'
-      });
-      return;
-    }
-
-    const member = await GroupService.updateMemberRole(groupId, targetUserId, role, requesterId);
-    
-    res.status(200).json({
-      success: true,
-      data: member
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const joinGroup = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
