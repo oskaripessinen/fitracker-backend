@@ -70,3 +70,22 @@ export const deleteExpense = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+export const classifyExpense = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { data } = req.body;
+    if (!data || typeof data !== 'string') {
+      res.status(400).json({ success: false, error: 'Invalid data for classification' });
+      return;
+    }
+
+    const classification = await ExpenseService.classifyExpense(data);
+    res.status(200).json({ success: true, data: classification });
+  } catch (error) {
+    console.error('Error classifying expense:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to classify expense'
+    });
+  }
+}
+

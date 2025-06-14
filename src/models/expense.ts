@@ -26,7 +26,7 @@ export class ExpenseModel {
     expense_date?: Date;
   }) {
     const expenses = await sql`
-      INSERT INTO expenses (group_id, amount, title, description, paid_by, expense_date, created_at, updated_at)
+      INSERT INTO expenses (group_id, amount, title, description, category, paid_by, expense_date, created_at, updated_at)
       VALUES (
         ${expenseData.group_id}, 
         ${expenseData.amount}, 

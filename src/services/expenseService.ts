@@ -1,4 +1,9 @@
 import { ExpenseModel } from "../models/expense";
+import Together from "together-ai";
+
+const together = new Together({
+  apiKey: process.env.TOGETHER_API_KEY
+});
 
 export class ExpenseService {
   static async getExpensesByGroupId(groupId: number) {
@@ -61,5 +66,39 @@ export class ExpenseService {
       console.error("Error deleting expense:", error);
       throw error;
     }
+  }
+
+  static async classifyExpense(data: string) {
+    const model = process.env.MODEL;
+    if (!model) {
+      throw new Error("Model not specified in environment variables");
+    }
+    const response = await together.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: `
+            Classify the following expense into one of the following categories:
+
+            [food, travel, entertainment, utilities, healthcare, other]
+
+            Expense: ${data}
+
+            Respond with only the category name. Do not explain. Do not use any punctuation.
+                  `.trim()
+                }
+              ],
+              model: model,
+        });
+      if (response.choices[0]?.message?.content) {
+        const category = response.choices[0].message.content.trim();
+        console.log("AI Category:", response.choices);
+        if (['food', 'housing' ,'transportation' ,'entertainment' ,'utilities' ,'health' ,'clothing' ,'other'].includes(category)) {
+          return category;
+        } else {
+          throw new Error("Invalid category returned from AI model");
+        }
+      }
+      throw new Error("No category returned from AI model");
   }
 }
