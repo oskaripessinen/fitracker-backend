@@ -1,5 +1,8 @@
 import { ExpenseModel } from "../models/expense";
 import Together from "together-ai";
+import { ImageAnnotatorClient } from '@google-cloud/vision';
+
+const vision = require('@google-cloud/vision');
 
 const together = new Together({
   apiKey: process.env.TOGETHER_API_KEY
@@ -82,23 +85,57 @@ export class ExpenseService {
 
             [food, travel, entertainment, utilities, healthcare, other]
 
+            Also, give total purchase price use the last number mentioned in the expense or number that comes after total.
+
+            lastly give name for the expense.
+
             Expense: ${data}
 
-            Respond with only the category name. Do not explain. Do not use any punctuation.
+            Respond with only the category name, the total price in euros and the expense name. Do not explain. Do not use any punctuation.
                   `.trim()
                 }
               ],
               model: model,
         });
       if (response.choices[0]?.message?.content) {
-        const category = response.choices[0].message.content.trim();
+        const [category, totalPrice, expenseName] = response.choices[0].message.content.trim().split(" ");
         console.log("AI Category:", response.choices);
-        if (['food', 'housing' ,'transportation' ,'entertainment' ,'utilities' ,'health' ,'clothing' ,'other'].includes(category)) {
-          return category;
+        if (['travel','food', 'housing' ,'transportation' ,'entertainment' ,'utilities' ,'health' ,'clothing' ,'other'].includes(category)) {
+          return { category, totalPrice: parseFloat(totalPrice), expenseName: expenseName };
         } else {
           throw new Error("Invalid category returned from AI model");
         }
       }
       throw new Error("No category returned from AI model");
+  }
+
+  static async orcDetectExpense(base64Image: string): Promise<string> {
+    try {
+      console.log('Starting OCR detection...');
+      
+
+      const client = new ImageAnnotatorClient({
+        keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+      });
+
+      const request = {
+        image: {
+          content: base64Image
+        }
+      };
+
+      const [result] = await client.textDetection(request);
+      const detections = result.textAnnotations;
+      console.log('OCR detection completed:', detections);
+      
+      if (!detections || detections.length === 0) {
+        return 'No text detected';
+      }
+
+      return detections[0].description || '';
+    } catch (error) {
+      console.error('OCR detection failed:', error);
+      throw new Error('Failed to detect text from image');
+    }
   }
 }

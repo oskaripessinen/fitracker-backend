@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/vision": "^5.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -19,6 +20,7 @@
     "morgan": "^1.10.0",
     "pg": "^8.16.0",
     "postgres": "^3.4.7",
+    "tesseract.js": "^6.0.1",
     "together-ai": "^0.16.0"
   },
   "devDependencies": {
@@ -28,6 +30,7 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.15.21",
     "@types/pg": "^8.15.2",
+    "@types/tesseract.js": "^2.0.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }

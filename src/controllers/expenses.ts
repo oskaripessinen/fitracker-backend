@@ -89,3 +89,22 @@ export const classifyExpense = async (req: Request, res: Response): Promise<void
   }
 }
 
+export const orcDetectExpense = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { image } = req.body;
+    if (!image || typeof image !== 'string') {
+      res.status(400).json({ success: false, error: 'Invalid image data' });
+      return;
+    }
+
+    const result = await ExpenseService.orcDetectExpense(image);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error('Error detecting expense from image:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to detect expense from image'
+    });
+  }
+}
+

@@ -1,3 +1,12 @@
 .env
 node_modules/
-node_modules
+.cache/
+tessdata/
+*.traineddata
+
+~/.cache/tesseract.js/
+.tesseract-cache/
+
+ocr-cache/
+temp-images/
+shareflow-459710-7c19620cd237.json
