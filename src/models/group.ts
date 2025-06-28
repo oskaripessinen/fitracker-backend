@@ -134,4 +134,56 @@ export class GroupModel {
     `;
     return result.count;
   }
+  
+  static async inviteUserToGroup(groupId: number, userId: string, inviterId: string) {
+    const invite = await sql`
+      INSERT INTO group_invites (group_id, user_id, invited_at, inviter_id)
+      VALUES (${groupId}, ${userId}, NOW(), ${inviterId})
+      ON CONFLICT (group_id, user_id) DO NOTHING
+      RETURNING *
+    `;
+    return invite[0];
+  }
+
+  static async getGroupInvites(userId: string) {
+    return await sql`
+      SELECT 
+        gi.group_id, g.name, g.description, g.created_at,
+        gi.invited_at
+      FROM group_invites gi
+      JOIN groups g ON gi.group_id = g.id
+      WHERE gi.user_id = ${userId}
+      ORDER BY gi.invited_at DESC
+    `;
+  }
+  
+  static async acceptGroupInvite(groupId: number, userId: string) {
+    const invite = await sql`
+      DELETE FROM group_invites 
+      WHERE group_id = ${groupId} AND user_id = ${userId}
+      RETURNING *
+    `;
+    
+    if (invite.length === 0) {
+      throw new Error('Invite not found or already accepted');
+    }
+
+    await this.addMember(groupId, userId);
+    return invite[0];
+  }
+
+  static async declineGroupInvite(groupId: number, userId: string) {
+    const result = await sql`
+      DELETE FROM group_invites 
+      WHERE group_id = ${groupId} AND user_id = ${userId}
+    `;
+    
+    if (result.count === 0) {
+      throw new Error('Invite not found or already declined');
+    }
+    
+    return { success: true };
+  }
+
 }
+

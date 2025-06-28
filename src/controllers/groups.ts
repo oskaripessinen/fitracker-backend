@@ -333,3 +333,101 @@ export const getGroupWithMembers = async (req: AuthenticatedRequest, res: Respon
     next(error);
   }
 };
+
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+  };
+}
+
+export const inviteUserToGroup = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const { email } = req.body;
+    const inviterId = req.user!.id;
+
+    if (!groupId) {
+      res.status(400).json({ error: 'Invalid group ID' });
+      return; 
+    }
+
+    if (!email) {
+      res.status(400).json({ error: 'Email is required' });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({ error: 'Invalid email format' });
+      return;
+    }
+
+    const inviteData = await GroupService.inviteUserByEmail(groupId, email, inviterId);
+
+    res.status(201).json({
+      message: 'Invitation sent successfully',
+      invite: inviteData
+    });
+  } catch (error) {
+    console.error('Error inviting user to group:', error);
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};
+
+export const getGroupInvites = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { token } = req.params;
+    
+    const invite = await GroupService.getGroupInvites(token);
+    
+    res.json(invite);
+  } catch (error) {
+    console.error('Error fetching group invite:', error);
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};
+
+export const acceptGroupInvite = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { token } = req.params;
+    const userId = req.user!.id;
+    
+    const result = await GroupService.acceptGroupInvite(token, userId);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error accepting group invite:', error);
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};
+
+export const declineGroupInvite = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { token } = req.params;
+    const userId = req.user?.id;
+    
+    const result = await GroupService.declineGroupInvite(token, userId);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error declining group invite:', error);
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};

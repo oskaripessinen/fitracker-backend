@@ -1,4 +1,5 @@
 import sql from '../config/database';
+import { User } from '../types/user';
 
 export class UserModel {
   static async findAll() {
@@ -10,8 +11,8 @@ export class UserModel {
     return users.length > 0 ? users[0] : null;
   }
 
-  static async findByEmail(email: string) {
-    const users = await sql`SELECT * FROM users WHERE email = ${email}`;
+  static async findByEmail(email: string): Promise<User | null> {
+    const users = await sql<User[]>`SELECT * FROM users WHERE email = ${email}`;
     return users.length > 0 ? users[0] : null;
   }
 
@@ -37,7 +38,7 @@ export class UserModel {
     const values = Object.values(updates);
     values.push(id);
 
-    const query = `UPDATE users SET ${setClause}, updated_at = NOW() WHERE id = $${values.length} RETURNING *`;
+    const query = `UPDATE users SET ${setClause}, updated_at = NOW() WHERE google_id = $${values.length} RETURNING *`;
     const users = await sql.unsafe(query, values);
     return users.length > 0 ? users[0] : null;
   }

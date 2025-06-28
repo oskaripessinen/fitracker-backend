@@ -10,7 +10,11 @@ import {
   joinGroup,
   leaveGroup,
   getUserGroups,
-  getGroupWithMembers
+  getGroupWithMembers,
+  inviteUserToGroup,
+  getGroupInvites,
+  acceptGroupInvite,
+  declineGroupInvite,
 } from '../controllers/groups';
 import { authenticateToken } from '../middleware/auth';
 
@@ -34,6 +38,11 @@ groupRoutes.post('/:id/leave',authenticateToken, leaveGroup);
 groupRoutes.get('/:id/details', getGroupWithMembers);
 
 
-groupRoutes.get('/user/my-groups',authenticateToken, getUserGroups);         
+groupRoutes.get('/user/my-groups',authenticateToken, getUserGroups);
+
+groupRoutes.post('/:id/invite', authenticateToken, inviteUserToGroup);
+groupRoutes.get('/user/invites', authenticateToken, getGroupInvites);
+groupRoutes.post('/:id/invites/:userId/accept', authenticateToken, acceptGroupInvite);
+groupRoutes.post('/:id/invites/:userId/decline', authenticateToken, declineGroupInvite);
 
 export default groupRoutes;
