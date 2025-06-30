@@ -15,34 +15,31 @@ import {
   getGroupInvites,
   acceptGroupInvite,
   declineGroupInvite,
+  getUserInvites
 } from '../controllers/groups';
 import { authenticateToken } from '../middleware/auth';
 
 const groupRoutes = express.Router();
 
 
-groupRoutes.get('/', getGroups);                          
-groupRoutes.get('/:id', getGroupById);                    
-
+groupRoutes.get('/', getGroups);
 groupRoutes.post('/', authenticateToken, createGroup);
-groupRoutes.put('/:id', updateGroup); 
 
-groupRoutes.get('/:id/members', getGroupMembers);         
-groupRoutes.post('/:id/members', addMember);              
-groupRoutes.delete('/:id/members/:userId', removeMember); 
+groupRoutes.get('/user/my-groups', authenticateToken, getUserGroups);
+groupRoutes.get('/user/invites', authenticateToken, getUserInvites);
 
-groupRoutes.post('/:id/join', joinGroup);                 
-groupRoutes.post('/:id/leave',authenticateToken, leaveGroup);                
+groupRoutes.post('/invites/:token/accept', authenticateToken, acceptGroupInvite);
+groupRoutes.post('/invites/:token/decline', authenticateToken, declineGroupInvite);
 
 
-groupRoutes.get('/:id/details', getGroupWithMembers);
-
-
-groupRoutes.get('/user/my-groups',authenticateToken, getUserGroups);
-
+groupRoutes.get('/:id', getGroupById);
+groupRoutes.put('/:id', authenticateToken, updateGroup);
+groupRoutes.get('/:id/details', authenticateToken, getGroupWithMembers); 
+groupRoutes.get('/:id/members', authenticateToken, getGroupMembers);
+groupRoutes.post('/:id/members', authenticateToken, addMember); 
+groupRoutes.delete('/:id/members/:userId', authenticateToken, removeMember); 
+groupRoutes.post('/:id/join', authenticateToken, joinGroup); 
+groupRoutes.post('/:id/leave', authenticateToken, leaveGroup);
 groupRoutes.post('/:id/invite', authenticateToken, inviteUserToGroup);
-groupRoutes.get('/user/invites', authenticateToken, getGroupInvites);
-groupRoutes.post('/:id/invites/:userId/accept', authenticateToken, acceptGroupInvite);
-groupRoutes.post('/:id/invites/:userId/decline', authenticateToken, declineGroupInvite);
 
 export default groupRoutes;

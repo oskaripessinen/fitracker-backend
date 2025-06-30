@@ -333,6 +333,21 @@ export class GroupService {
     console.log(`Sending invite email to ${email} for group ${groupName} from ${inviterName} with token ${token}`);
   }
 
+  static async getPendingInvitesForUser(userId: string) {
+    try {
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const invites = await GroupInviteModel.findPendingInvitesForUser(userId);
+      return invites;
+    } catch (error) {
+      console.error('Error fetching pending invites for user:', error);
+      throw error;
+    }
+  }
+
   static async getGroupInvites(token: string) {
     try {
       const invite = await GroupInviteModel.findByToken(token);

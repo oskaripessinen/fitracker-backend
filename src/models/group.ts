@@ -146,7 +146,7 @@ export class GroupModel {
   }
 
   static async getGroupInvites(userId: string) {
-    return await sql`
+    const invites = await sql`
       SELECT 
         gi.group_id, g.name, g.description, g.created_at,
         gi.invited_at
@@ -155,6 +155,8 @@ export class GroupModel {
       WHERE gi.user_id = ${userId}
       ORDER BY gi.invited_at DESC
     `;
+    console.log('Invites:', invites);
+    return invites;
   }
   
   static async acceptGroupInvite(groupId: number, userId: string) {
