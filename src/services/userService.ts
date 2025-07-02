@@ -39,7 +39,6 @@ export class UserService {
 
   static async createUser(userData: CreateUserRequest): Promise<User> {
     try {
-      // Business validation
       if (!userData.email || !userData.full_name) {
         throw new Error('Email and full name are required');
       }
@@ -66,7 +65,6 @@ export class UserService {
   
   static async updateUser(id: string, userData: UpdateUserRequest): Promise<User> {
     try {
-      // Rakenna UPDATE kysely dynaamisesti vain ei-undefined arvoille
       const updates: string[] = [];
       const values: any[] = [];
       
@@ -98,7 +96,7 @@ export class UserService {
       updates.push('updated_at = NOW()');
       values.push(id);
       
-      if (updates.length === 1) { // Vain updated_at
+      if (updates.length === 1) {
         throw new Error('No fields to update');
       }
       

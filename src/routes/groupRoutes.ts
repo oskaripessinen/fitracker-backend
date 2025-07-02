@@ -12,10 +12,9 @@ import {
   getUserGroups,
   getGroupWithMembers,
   inviteUserToGroup,
-  getGroupInvites,
   acceptGroupInvite,
   declineGroupInvite,
-  getUserInvites
+  findPendingInvitesForUser
 } from '../controllers/groups';
 import { authenticateToken } from '../middleware/auth';
 
@@ -26,10 +25,10 @@ groupRoutes.get('/', getGroups);
 groupRoutes.post('/', authenticateToken, createGroup);
 
 groupRoutes.get('/user/my-groups', authenticateToken, getUserGroups);
-groupRoutes.get('/user/invites', authenticateToken, getUserInvites);
+groupRoutes.get('/invites', authenticateToken, findPendingInvitesForUser);
 
-groupRoutes.post('/invites/:token/accept', authenticateToken, acceptGroupInvite);
-groupRoutes.post('/invites/:token/decline', authenticateToken, declineGroupInvite);
+groupRoutes.post('/invites/:inviteId/accept', authenticateToken, acceptGroupInvite);
+groupRoutes.post('/invites/:inviteId/decline', authenticateToken, declineGroupInvite);
 
 
 groupRoutes.get('/:id', getGroupById);

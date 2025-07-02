@@ -379,36 +379,18 @@ export const inviteUserToGroup = async (req: AuthRequest, res: Response): Promis
   }
 };
 
-export const getUserInvites = async (req: AuthRequest, res: Response): Promise<void> => {
+export const findPendingInvitesForUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
-    
-    const invites = await GroupService.getPendingInvitesForUser(userId);
-    
+    const invites = await GroupService.findPendingInvitesForUser(userId);
+
     res.status(200).json({
       success: true,
       count: invites.length,
       data: invites
     });
   } catch (error) {
-    console.error('Error fetching user invites:', error);
-    if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
-};
-
-export const getGroupInvites = async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const { token } = req.params;
-    
-    const invite = await GroupService.getGroupInvites(token);
-    
-    res.json(invite);
-  } catch (error) {
-    console.error('Error fetching group invite:', error);
+    console.error('Error fetching pending invites for user:', error);
     if (error instanceof Error) {
       res.status(400).json({ error: error.message });
     } else {
@@ -419,10 +401,15 @@ export const getGroupInvites = async (req: AuthRequest, res: Response): Promise<
 
 export const acceptGroupInvite = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { token } = req.params;
+    const inviteId = parseInt(req.params.inviteId);
     const userId = req.user!.id;
     
-    const result = await GroupService.acceptGroupInvite(token, userId);
+    if (!inviteId) {
+      res.status(400).json({ error: 'Invalid invite ID' });
+      return;
+    }
+    
+    const result = await GroupService.acceptGroupInviteById(inviteId, userId);
     
     res.json(result);
   } catch (error) {

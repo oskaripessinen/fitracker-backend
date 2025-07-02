@@ -96,4 +96,31 @@ export class GroupInviteModel {
     
     return invites;
   }
+
+  static async findById(id: number): Promise<GroupInviteWithDetails | null> {
+    const invites = await sql<GroupInviteWithDetails[]>`
+      SELECT 
+        gi.*,
+        g.name as group_name,
+        u.full_name as inviter_name,
+        u.email as inviter_email
+      FROM group_invites gi
+      JOIN groups g ON gi.group_id = g.id
+      JOIN users u ON gi.inviter_id = u.google_id
+      WHERE gi.id = ${id}
+    `;
+    
+    return invites.length > 0 ? invites[0] : null;
+  }
+
+  static async updateStatusById(id: number, status: 'accepted' | 'declined'): Promise<GroupInvite | null> {
+    const invites = await sql<GroupInvite[]>`
+      UPDATE group_invites 
+      SET status = ${status}, updated_at = NOW()
+      WHERE id = ${id} AND status = 'pending' AND expires_at > NOW()
+      RETURNING *
+    `;
+    
+    return invites.length > 0 ? invites[0] : null;
+  }
 }

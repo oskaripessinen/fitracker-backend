@@ -370,12 +370,76 @@ export class GroupService {
     }
   }
 
-  static async acceptGroupInvite(token: string, userId: string) {
+  static async findPendingInvitesForUser(userId: string) {
     try {
-      const invite = await GroupInviteModel.findByToken(token);
-      if (!invite) {
-        throw new Error('Invitation not found or expired');
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        throw new Error('User not found');
       }
+      const invites = await GroupInviteModel.findPendingInvitesForUser(userId);
+      return invites;
+    } catch (error) {
+      console.error('Error fetching pending invites for user:', error);
+      throw error;
+    }
+  }
+
+  static async acceptGroupInvite(inviteId: number, userId: string) {
+   try {
+    const invite = await GroupInviteModel.findById(inviteId);
+    if (!invite) {
+      throw new Error('Invitation not found');
+    }
+
+    if (invite.status !== 'pending') {
+      throw new Error('Invitation is no longer pending');
+    }
+
+    if (new Date(invite.expires_at) < new Date()) {
+      throw new Error('Invitation has expired');
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (invite.invitee_id && invite.invitee_id !== userId) {
+      throw new Error('This invitation is not for you');
+    }
+
+    if (!invite.invitee_id && invite.invitee_email !== user.email) {
+      throw new Error('This invitation is not for you');
+    }
+
+    const isMember = await GroupModel.isMember(invite.group_id, userId);
+    if (isMember) {
+      throw new Error('You are already a member of this group');
+    }
+
+    await GroupModel.addMember(invite.group_id, userId);
+
+    await GroupInviteModel.updateStatusById(inviteId, 'accepted');
+
+    return { 
+      success: true,
+      message: 'Successfully joined the group'
+    };
+
+  } catch (error) {
+    console.error('Error accepting group invite by ID:', error);
+    throw error;
+  }
+}
+
+  static async acceptGroupInviteById(inviteId: number, userId: string) {
+    try {
+
+      const invite = await GroupInviteModel.findById(inviteId);
+      if (!invite) {
+        throw new Error('Invitation not found');
+      }
+
 
       if (invite.status !== 'pending') {
         throw new Error('Invitation is no longer pending');
@@ -405,11 +469,15 @@ export class GroupService {
 
       await GroupModel.addMember(invite.group_id, userId);
 
-      await GroupInviteModel.updateStatus(token, 'accepted');
+      await GroupInviteModel.updateStatusById(inviteId, 'accepted');
 
-      return { message: 'Successfully joined the group' };
+      return { 
+        success: true,
+        message: 'Successfully joined the group'
+      };
+
     } catch (error) {
-      console.error('Error accepting group invite:', error);
+      console.error('Error accepting group invite by ID:', error);
       throw error;
     }
   }
