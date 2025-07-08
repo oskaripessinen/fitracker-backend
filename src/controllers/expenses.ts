@@ -26,7 +26,7 @@ export const createExpense = async (req: Request, res: Response): Promise<void> 
     console.error('Error creating expense:', error);
     res.status(400).json({ 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to create expense'
+      error: 'Failed to create expense'
     });
   }
 };
@@ -46,7 +46,7 @@ export const updateExpense = async (req: Request, res: Response): Promise<void> 
     console.error('Error updating expense:', error);
     res.status(400).json({ 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to update expense'
+      error: 'Failed to update expense'
     });
   }
 };
@@ -65,7 +65,7 @@ export const deleteExpense = async (req: Request, res: Response): Promise<void> 
     console.error('Error deleting expense:', error);
     res.status(400).json({ 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to delete expense'
+      error: 'Failed to delete expense'
     });
   }
 };
@@ -84,7 +84,7 @@ export const classifyExpense = async (req: Request, res: Response): Promise<void
     console.error('Error classifying expense:', error);
     res.status(500).json({ 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to classify expense'
+      error: 'Failed to classify expense'
     });
   }
 }
@@ -103,7 +103,7 @@ export const orcDetectExpense = async (req: Request, res: Response): Promise<voi
     console.error('Error detecting expense from image:', error);
     res.status(500).json({ 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to detect expense from image'
+      error: 'Failed to detect expense from image'
     });
   }
 }

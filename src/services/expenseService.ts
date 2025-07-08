@@ -1,6 +1,7 @@
 import { ExpenseModel } from "../models/expense";
 import Together from "together-ai";
 import { ImageAnnotatorClient } from '@google-cloud/vision';
+import { CreateExpenseRequest } from "../types/expense";
 
 const vision = require('@google-cloud/vision');
 
@@ -19,15 +20,7 @@ export class ExpenseService {
     }
   }
 
-  static async createExpense(expenseData: {
-    group_id: number;
-    amount: number;
-    title: string;
-    description?: string;
-    category?: string;
-    paid_by: string;
-    expense_date?: Date;
-  }) {
+  static async createExpense(expenseData: CreateExpenseRequest) {
     try {
       if (!expenseData.title || expenseData.title.trim().length === 0) {
         throw new Error("Expense title is required");
