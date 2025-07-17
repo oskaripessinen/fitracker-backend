@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoute';
 import groupRoutes from './routes/groupRoutes';
 import incomeRoutes from './routes/incomeRoutes';
 import expenseRoutes from './routes/expenseRoutes';
+import investmentRoutes from './routes/investmentRoutes';
 import errorHandler from './middleware/errorHandler';
 
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/income', incomeRoutes);
+app.use('/api/investments', investmentRoutes);
 
 app.use(errorHandler);
 
