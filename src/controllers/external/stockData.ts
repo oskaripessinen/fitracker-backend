@@ -1,4 +1,3 @@
-// src/controllers/stocks.ts
 import { Request, Response } from 'express';
 import { StockApiService } from '../../services/external/getStockData';
 
@@ -38,9 +37,10 @@ export const searchStocks = async (req: Request, res: Response): Promise<void> =
 
 export const getStockPrice = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { ticker } = req.params;
+    const { ticker, date } = req.query;
     
-    if (!ticker) {
+    
+    if (!ticker || typeof ticker !== 'string') {
       res.status(400).json({
         success: false,
         error: 'Ticker symbol is required'
@@ -48,7 +48,24 @@ export const getStockPrice = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const priceData = '';
+    const decodedTicker = decodeURIComponent(ticker);
+
+    let targetDate: Date;
+    if (date && typeof date === 'string') {
+      targetDate = new Date(date);
+      if (isNaN(targetDate.getTime())) {
+        res.status(400).json({
+          success: false,
+          error: 'Invalid date format. Use YYYY-MM-DD'
+        });
+        return;
+      }
+    } else {
+      targetDate = new Date();
+    }
+
+
+    const priceData = await StockApiService.getStockPrice(decodedTicker, targetDate);
     
     res.status(200).json({
       success: true,
@@ -58,7 +75,7 @@ export const getStockPrice = async (req: Request, res: Response): Promise<void> 
     console.error('Error in getStockPrice controller:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch stock price'
+      error: error instanceof Error ? error.message : 'Failed to fetch stock price'
     });
   }
 };
