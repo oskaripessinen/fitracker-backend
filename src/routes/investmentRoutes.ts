@@ -1,10 +1,12 @@
 import express from 'express';
 import { searchStocks, getStockPrice } from '../controllers/external/stockData';
+import { createInvestment } from '../controllers/investment';
 import { authenticateToken } from '../middleware/auth';
 
-const stockRoutes = express.Router();
+const investmentkRoutes = express.Router();
 
-stockRoutes.get('/stockPrice', authenticateToken, getStockPrice);
-stockRoutes.get('/search', authenticateToken, searchStocks);
+investmentkRoutes.get('/stockPrice', authenticateToken, getStockPrice);
+investmentkRoutes.get('/search', authenticateToken, searchStocks);
+investmentkRoutes.post('/', authenticateToken, createInvestment);
 
-export default stockRoutes;
+export default investmentkRoutes;

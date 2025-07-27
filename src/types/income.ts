@@ -1,5 +1,3 @@
-
-
 export type IncomeCategory = 'salary' | 'freelance' | 'investments' | 'business' | 'gifts' | 'other';
 
 export interface Income {
@@ -13,6 +11,24 @@ export interface Income {
   income_date?: Date;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface CreateIncomeRequest {
+  group_id: number;
+  title: string;
+  amount: number;
+  category?: IncomeCategory;
+  description?: string;
+  userId: string;
+  income_date?: Date;
+}
+
+export interface UpdateIncomeRequest {
+  title?: string;
+  amount?: number;
+  category?: IncomeCategory;
+  description?: string;
+  income_date?: Date;
 }
 
 export interface IncomeWithUser extends Income {

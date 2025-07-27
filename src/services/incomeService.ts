@@ -26,7 +26,7 @@ export class IncomeService {
     static async deleteIncome(incomeId: number) {
         try {
             const result = await IncomeModel.delete(incomeId);
-            if (result === 0) {
+            if (result === false) {
                 throw new Error("Delete failed!");
             }
             return { success: true };
