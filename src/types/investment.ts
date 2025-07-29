@@ -20,3 +20,8 @@ export interface createInvestmentRequest {
   purchase_price: number;
   purchase_date: Date;
 }
+
+export interface InvestmentWithUser extends Investment {
+    added_by_name?: string;
+    added_by_email?: string;
+}

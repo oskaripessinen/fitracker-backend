@@ -12,4 +12,13 @@ export class InvestmentService {
             throw(error)
         }
     }
+
+    static async getInvestmentsWithGroupId (groupId: number) {
+        try {
+            const investments = await investmentModel.findByGroupId(groupId);
+            return investments;
+        } catch(error) {
+            throw(error)
+        }
+    }
 }

@@ -1,4 +1,4 @@
-import { Investment } from "../types/investment";
+import { Investment, InvestmentWithUser } from "../types/investment";
 import sql from "../config/database";
 
 export class investmentModel {
@@ -28,6 +28,20 @@ export class investmentModel {
             RETURNING *
             `;
             return investments[0];
+        }
+
+        static async findByGroupId(groupId: number): Promise<InvestmentWithUser[]> {
+            const investments = await sql<InvestmentWithUser[]>`
+                SELECT 
+                    i.*,
+                    u.full_name as added_by_name,
+                    u.email as added_by_email
+                FROM investments i
+                LEFT JOIN users u ON i.added_by = u.google_id
+                WHERE i.group_id = ${groupId}
+                ORDER BY i.created_at DESC
+            `;
+            return investments;
         }
     
 }

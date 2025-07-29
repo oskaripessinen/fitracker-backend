@@ -51,3 +51,18 @@ export const createInvestment = async (req: Request, res: Response): Promise<voi
         });
     }
 }
+
+export const getInvestmentsWithGroupId = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const groupId = parseInt(req.params.groupId);
+        if (isNaN(groupId)) {
+                res.status(400).json({success: false, error: 'Invalid group id'})
+                return;
+            }
+        const investment = await InvestmentService.getInvestmentsWithGroupId(groupId);
+        res.status(200).json({success: true, count: investment.length, data: investment});
+    } catch(error) {
+        console.error('Error fetching expenses:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch investments' });
+    }
+}
