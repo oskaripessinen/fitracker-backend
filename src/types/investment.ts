@@ -15,6 +15,7 @@ export interface createInvestmentRequest {
   group_id: number;
   ticker: string;
   name: string;
+  type: string;
   quantity: number;
   added_by: string;
   purchase_price: number;

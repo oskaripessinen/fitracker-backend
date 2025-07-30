@@ -47,11 +47,7 @@ export class StockApiService {
         }
       });
 
-      if (data && data.ResultSet && data.ResultSet.Result) {
-        data.ResultSet.Result = data.ResultSet.Result.filter((item: any) => 
-          item.typeDisp === 'Equity' || item.typeDisp === 'Etf'
-        );
-      }
+      
 
       return data;
     } catch (error) {

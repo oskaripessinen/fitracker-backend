@@ -7,17 +7,19 @@ export class investmentModel {
         group_id: number,
         ticker: string,
         name: string,
+        type: string,
         quantity: number,
         added_by: string,
         purchase_price: number,
         purchase_date: Date
     }): Promise<Investment> {
 
-        const investments = await sql<Investment[]>`INSERT INTO investments (group_id, ticker, name, quantity, purchase_price, purchase_date, added_by, created_at, updated_at)
+        const investments = await sql<Investment[]>`INSERT INTO investments (group_id, ticker, name, type, quantity, purchase_price, purchase_date, added_by, created_at, updated_at)
             VALUES (
                 ${investmentData.group_id},
                 ${investmentData.ticker},
                 ${investmentData.name},
+                ${investmentData.type},
                 ${investmentData.quantity},
                 ${investmentData.purchase_price},
                 ${investmentData.purchase_date},
